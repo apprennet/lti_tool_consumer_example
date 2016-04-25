@@ -9,8 +9,7 @@
     </tr>
     <% @consumer.generate_launch_data.each_pair do |key, val| %>
       <tr>
-        <td><%= key %></td>
-        <td><%= val %></td>
+        <td><%= key %>: <%= val %></td>
       </tr>
     <% end %>
   </table>

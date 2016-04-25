@@ -16,27 +16,75 @@
   <table>
     <tr>
       <td>Tool Name</td>
-      <td><input name="tool_name" type="text" value="Test Sinatra App"/></td>
+      <td><input name="tool_name" type="text" value="ApprenNet LTI Tool Consumer Emulator" /></td>
     </tr>
     <tr>
       <td>Consumer Key</td>
-      <td><input name="consumer_key" type="text" value="test"/></td>
+      <td><input name="consumer_key" type="text" /></td>
     </tr>
     <tr>
       <td>Consumer Secret</td>
-      <td><input name="consumer_secret" type="text" value="secret"/></td>
+      <td><input name="consumer_secret" type="text" /></td>
     </tr>
     <tr>
       <td>Launch URL</td>
-      <td><input name="launch_url" type="text" value="http://localhost:9393/lti_tool"/></td>
+      <td><input name="launch_url" type="text" /></td>
     </tr>
     <tr>
-      <td>Launch as assignment</td>
-      <td><input type="checkbox" name="assignment" checked="checked"></td>
+      <td>Launch Return URL</td>
+      <td><input name="launch_presentation_return_url" type="text" value="<%= @launch_presentation_return_url %>"/></td>
     </tr>
     <tr>
       <td>Launch automatically</td>
       <td><input type="checkbox" name="autolaunch" checked="checked"></td>
+    </tr>
+    <tr>
+      <td>resource_link_id</td>
+      <td><input name="resource_link_id" type="text" value="<%= @resource_link_id %>" /></td>
+    </tr>
+    <tr>
+      <td>context_id</td>
+      <td><input name="context_id" type="text" value="<%= @context_id %>" /></td>
+    </tr>
+    <tr>
+      <td>context_title</td>
+      <td><input name="context_title" type="text" value="<%= 'Context ' + @context_id %>" /></td>
+    </tr>
+    <tr>
+      <td>user_id</td>
+      <td><input name="user_id" type="text" value="<%= @user_id %>" /></td>
+    </tr>
+    <tr>
+      <td>roles</td>
+      <td><input name="roles" type="text" value="Learner" /></td>
+    </tr>
+    <tr>
+      <td>lis_person_name_given</td>
+      <td><input name="lis_person_name_given" type="text" value="John" /></td>
+    </tr>
+    <tr>
+      <td>lis_person_name_family</td>
+      <td><input name="lis_person_name_family" type="text" value="Doe" /></td>
+    </tr>
+    <tr>
+      <td>lis_person_contact_email_primary</td>
+      <td><input name="lis_person_contact_email_primary" type="text" value="<%= @user_id + '@example.com' %>" /></td>
+    </tr>
+    <tr>
+      <td>custom_parent_group_id</td>
+      <td><input name="custom_parent_group_id" type="text" /></td>
+    </tr>
+    <tr>
+      <td>custom_resource_lookup_type</td>
+      <td><input name="custom_resource_lookup_type" type="text" value="EXERCISE_BY_PARENT_ID" /></td>
+    </tr>
+    <tr>
+      <td>custom_resource_lookup_value</td>
+      <td><input name="custom_resource_lookup_value" type="text" /></td>
+    </tr>
+    <tr>
+      <td>custom_resource_view</td>
+      <td><input name="custom_resource_view" type="text" value="DEFAULT" /></td>
     </tr>
   </table>
 

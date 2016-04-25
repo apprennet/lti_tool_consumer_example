@@ -4,6 +4,8 @@ require 'digest/md5'
 # must include the oauth proxy object
 require 'oauth/request_proxy/rack_request'
 require 'pp'
+require 'securerandom'
+require 'httparty'
 
 enable :sessions
 
@@ -18,13 +20,13 @@ post '/set_name' do
 end
 
 get '/tool_config' do
-  unless session['username']
-    redirect to('/')
-    return
-  end
-
+  session['username'] = params['username'] || 'Bob'
   @message = params['message']
   @username = session['username']
+  @launch_presentation_return_url = request.scheme + '://' + request.host_with_port + '/tool_return'
+  @resource_link_id = Digest::MD5.hexdigest(SecureRandom.hex + Time.now.strftime('%Y%m%d%H%M%S%L'))
+  @context_id = Time.now.strftime('%Y%m%d')
+  @user_id = Digest::MD5.hexdigest(SecureRandom.hex + Time.now.strftime('%Y%m%d%H%M%S%L'))
   erb :tool_config
 end
 
@@ -35,22 +37,61 @@ post '/tool_launch' do
   end
 
   tc = IMS::LTI::ToolConfig.new(:title => params['tool_name'], :launch_url => params['launch_url'])
-  tc.set_custom_param('message_from_sinatra', 'hey from the sinatra example consumer')
+
+  if params['custom_parent_group_id'] && params['custom_parent_group_id'] != ''
+    tc.set_custom_param('parent_group_id', params['custom_parent_group_id'])
+  end
+
+  if params['custom_resource_lookup_type'] && params['custom_resource_lookup_type'] != ''
+    tc.set_custom_param('resource_lookup_type', params['custom_resource_lookup_type'])
+  end
+
+  if params['custom_resource_lookup_value'] && params['custom_resource_lookup_value'] != ''
+    tc.set_custom_param('resource_lookup_value', params['custom_resource_lookup_value'])
+  end
+
+  if params['custom_resource_view'] && params['custom_resource_view'] != ''
+    tc.set_custom_param('resource_view', params['custom_resource_view'])
+  end
+
   @consumer = IMS::LTI::ToolConsumer.new(params['consumer_key'], params['consumer_secret'])
   @consumer.set_config(tc)
 
-  host = request.scheme + "://" + request.host_with_port
+  if params['resource_link_id'] && params['resource_link_id'] != ''
+    @consumer.resource_link_id = params['resource_link_id']
+  end
 
-  # Set some launch data from: http://www.imsglobal.org/LTI/v1p1pd/ltiIMGv1p1pd.html#_Toc309649684
-  # Only this first one is required, the rest are recommended
-  @consumer.resource_link_id = "thisisuniquetome"
-  @consumer.launch_presentation_return_url = host + '/tool_return'
-  @consumer.lis_person_name_given = session['username']
-  @consumer.user_id = Digest::MD5.hexdigest(session['username'])
-  @consumer.roles = "learner"
-  @consumer.context_id = "bestcourseever"
-  @consumer.context_title = "Example Sinatra Tool Consumer"
-  @consumer.tool_consumer_instance_name = "Frankie"
+  if params['launch_presentation_return_url'] && params['launch_presentation_return_url'] != ''
+    @consumer.launch_presentation_return_url = params['launch_presentation_return_url']
+  end
+
+  if params['context_id'] && params['context_id'] != ''
+    @consumer.context_id = params['context_id']
+  end
+
+  if params['context_title'] && params['context_title'] != ''
+    @consumer.context_title = params['context_title']
+  end
+
+  if params['user_id'] && params['user_id'] != ''
+    @consumer.user_id = params['user_id']
+  end
+
+  if params['roles'] && params['roles'] != ''
+    @consumer.roles = params['roles']
+  end
+
+  if params['lis_person_name_given'] && params['lis_person_name_given'] != ''
+    @consumer.lis_person_name_given = params['lis_person_name_given']
+  end
+
+  if params['lis_person_name_family'] && params['lis_person_name_family'] != ''
+    @consumer.lis_person_name_family = params['lis_person_name_family']
+  end
+
+  if params['lis_person_contact_email_primary'] && params['lis_person_contact_email_primary'] != ''
+    @consumer.lis_person_contact_email_primary = params['lis_person_contact_email_primary']
+  end
 
   if params['assignment']
     @consumer.lis_outcome_service_url = host + '/grade_passback'
@@ -58,6 +99,12 @@ post '/tool_launch' do
   end
 
   @autolaunch = !!params['autolaunch']
+
+  # If `background` param is included, immediately send LTI request, don't do it client-side.
+  if !!params['background']
+    launch_params = @consumer.generate_launch_data
+    HTTParty.post(@consumer.launch_url, :body => launch_params)
+  end
 
   erb :tool_launch
 end
